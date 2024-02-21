@@ -1,13 +1,18 @@
 package com.nhnacademy.springmvc.domain;
 
+import lombok.Data;
 import lombok.Value;
+import org.hibernate.validator.constraints.Length;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 @Value
+@Valid
+@Data
 public class StudentModifyRequest {
     //이름: 공백 제거 후 문자열의 길이가 0보다 커야 함
     @NotBlank
@@ -22,6 +27,6 @@ public class StudentModifyRequest {
     int score;
 
     //평가: 공백 제거 후 문자열의 길이가 0보다 크고 200보다 같거나 작아야 함
-    @NotBlank @Min(0) @Max(200)
+    @NotBlank @Length(min = (0), max = (200))
     String comment;
 }

@@ -1,15 +1,12 @@
 package com.nhnacademy.springmvc;
 
-import java.util.EnumSet;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
+
+import javax.servlet.*;
+import java.util.EnumSet;
 
 @Order(1)
 public class FilterInitializer implements WebApplicationInitializer {
@@ -27,8 +24,8 @@ public class FilterInitializer implements WebApplicationInitializer {
         FilterRegistration.Dynamic registration = servletContext.addFilter(filterName, filter);
         if (registration == null) {
             throw new IllegalStateException(
-                "Duplicate Filter registration for '" + filterName
-                    + "'. Check to ensure the Filter is only configured once.");
+                    "Duplicate Filter registration for '" + filterName
+                            + "'. Check to ensure the Filter is only configured once.");
         }
         registration.setAsyncSupported(true);
         EnumSet<DispatcherType> dispatcherTypes = getSecurityDispatcherTypes();

@@ -1,21 +1,20 @@
 package com.nhnacademy.springmvc.controller;
 
 import com.nhnacademy.springmvc.domain.Student;
-import com.nhnacademy.springmvc.domain.StudentModifyRequest;
-import com.nhnacademy.springmvc.exception.ValidationFailedException;
+import com.nhnacademy.springmvc.exception.StudentNotFoundException;
 import com.nhnacademy.springmvc.repository.StudentRepository;
 import com.nhnacademy.springmvc.repository.StudentRepositoryImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-
-import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/student")
+@Slf4j
 public class StudentController {
     private final StudentRepositoryImpl studentRepository;
 
@@ -24,46 +23,29 @@ public class StudentController {
     }
 
     @GetMapping("/{studentId}")
-    public String viewStudent(@PathVariable("studentId") long studentId) {
-        ModelAndView mav = new ModelAndView("studentView");
-        mav.addObject("student", studentRepository.getStudent(studentId));
-        return "studentView";
+    public ModelAndView viewStudent(@PathVariable("studentId") Long studentId) {
+
+        if (studentId != null && studentRepository.exists(studentId)) {
+
+            ModelAndView mav = new ModelAndView("studentView");
+            mav.addObject("student", studentRepository.getStudent(studentId));
+            log.debug("view raw///id: {}, map:{}", studentId, studentRepository.studentMap);
+            return mav;
+        } else throw new StudentNotFoundException();
+
     }
 
-    @GetMapping("/student/{studentId}?hideScore=yes")
-    public String viewStudentWithScoreHidden(@PathVariable String studentId,
-                                             ModelMap modelMap) {
-        Student student = studentRepository.getStudent(Long.parseLong(studentId));
-        modelMap.addAttribute("student", Student.constructScoreAndCommentMaskedStudent(student));
-        return "studentView";
-    }
+    @GetMapping(value = "/{studentId}", params = "hideScore=yes")
+    public String viewStudentWithScoreHidden(@PathVariable Long studentId, Model model) {
 
-    @GetMapping("/{studentId}/modify")
-    public String studentModifyForm(@PathVariable("studentId") long studentId, @ModelAttribute Student student, Model model) {
+        if (studentId != null && studentRepository.exists(studentId)) {
 
-        return "studentModify";
-    }
-
-    @PostMapping("/{studentId}/modify")
-    public String modifyStudent(@PathVariable("studentId") long studentId,
-                                @ModelAttribute Student student,
-                                @Valid @ModelAttribute StudentModifyRequest studentModifyRequest,
-                                BindingResult bindingResult,
-                                Model model) {
-
-        if (bindingResult.hasErrors()) {
-            throw new ValidationFailedException(bindingResult);
-        }
-
-        student.setName(studentModifyRequest.getName());
-        student.setEmail(studentModifyRequest.getEmail());
-        student.setScore(studentModifyRequest.getScore());
-        student.setComment(studentModifyRequest.getComment());
-
-        studentRepository.modify(student);
-
-        model.addAttribute("student", student);
-        return "studentView";
+            Student student = studentRepository.getStudent(studentId);
+            model.addAttribute("student", Student.constructScoreAndCommentMaskedStudent(student));
+            log.debug("view masked///id: {}, map:{}", studentId, studentRepository.studentMap);
+            return "studentView";
+        } else
+            throw new StudentNotFoundException();
     }
 
 }

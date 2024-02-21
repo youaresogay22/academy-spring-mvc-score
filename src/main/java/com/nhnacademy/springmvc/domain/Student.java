@@ -14,6 +14,8 @@ public class Student {
     private int score;
     private String comment;
 
+    static AtomicLong ID_GENERATOR = new AtomicLong();
+
     private Student(long id, String name, String email, int score, String comment) {
         this.id = id;
         this.name = name;
@@ -27,7 +29,7 @@ public class Student {
     }
 
     public static Student constructIdGeneratedStudent(String name, String email, int score, String comment) {
-        return Student.construct(new idGenerator().studentId, name, email, score, comment);
+        return Student.construct(ID_GENERATOR.incrementAndGet(), name, email, score, comment);
     }
 
     private static final int MASK_SCORE = -1;
@@ -37,17 +39,4 @@ public class Student {
         return new Student(student.getId(), student.getName(), student.getEmail(), MASK_SCORE, MASK_COMMENT);
     }
 
-    public static class idGenerator {
-        private final long studentId;
-
-        protected idGenerator() {
-            AtomicLong ID_GENERATOR = new AtomicLong();
-            studentId = ID_GENERATOR.incrementAndGet();
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(studentId);
-        }
-    }
 }
